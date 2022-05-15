@@ -204,12 +204,14 @@ Page({
 				}
 				break;
 
-			case xBlufi.XBLUFI_TYPE.TYPE_RECIEVE_CUSTON_DATA: //接收到来自设备的自定义信息, CUSTON好像是拼写错误
+			//接收到来自设备的自定义信息, CUSTON好像是拼写错误，当用户发送自定义数据的时候，设备默认会将数据原样返回
+			case xBlufi.XBLUFI_TYPE.TYPE_RECIEVE_CUSTON_DATA: 
 				console.log("收到来自设备的自定义数据: ", options.data);
 				wx.showModal({
 					title:"来自设备的自定义数据",
 					content: `${options.data}`,
 					showCancel: false,
+					confirmColor: '#fbad32',
 				})
 				break;
 
@@ -223,12 +225,13 @@ Page({
 				}
 				break;
 
-			case xblufi.XBLUFI_TYPE.TYPE_STATUS_CONNECTED: //连接状态检测
+			case xBlufi.XBLUFI_TYPE.TYPE_STATUS_CONNECTED: //连接状态检测
 				if(!options.result){
 					wx.showModal({
 						title: "蓝牙连接断开",
 						content: "请重新配网",
 						showCancel: false,
+						confirmColor: '#e74033',
 					})
 				}
 				break;
