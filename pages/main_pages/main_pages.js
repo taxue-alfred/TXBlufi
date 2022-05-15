@@ -9,7 +9,7 @@ Page({
 	data: {
 		//全局数据Data定义
 		products: ["MediaStateBoard", "CloudMedicalKit", "自定义"],
-		products_bludetooth_name: ["MediaStateBoard", "CloudMedicalKit"],
+		products_bluetooth_name: ["MediaStateBoard", "CloudMedicalKit"],
 		chips: ["ESP32", "ESP32-C3", "ESP32-S2", "ESP32-S3"],
 		bluetooth_name_list: [],
 		bluetooth_deviceId_list: [],
@@ -124,6 +124,25 @@ Page({
 						bluetooth_id: _this.data.bluetooth_deviceId_list[_this.data.bluetooth_select_index]
 					})
 					console.log(_this.data.bluetooth_name_list, _this.data.bluetooth_deviceId_list);
+
+					//对于停止搜索的时机进行判断
+					if(_this.data.device_customization){
+						//如果包含被定义的设备名称，那么就停止搜索, 蓝牙名称和设备名称的index是相同的，所以直接用设备名称下标查找
+						if(_this.data.bluetooth_name_list.includes(_this.data.products_bluetooth_name[_this.data.product_name_index])){
+							if (_this.data.bluetooth_searching){
+								xBlufi.notifyStartDiscoverBle({ 'isStart': false });
+
+								//发送蓝牙连接请求
+								let name = _this.data.bluetooth_name
+								xBlufi.notifyConnectBle({
+									isStart: true,
+									deviceId: _this.data.bluetooth_id,
+									name
+								});
+								console.log(_this.data.bluetooth_name, _this.data.bluetooth_id);
+							}
+						}
+					}
 				}
 				break;
 
@@ -217,7 +236,7 @@ Page({
 
 			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_START: //获取设备列表前动作
 				if (!options.result) {
-					console.log("蓝牙未开启 => ", options);
+					console.log("蓝牙未开启: ", options);
 					wx.showToast({ title: "蓝牙未开启", icon: "none" });
 				} else {
 					console.log("蓝牙已正常打开");
@@ -257,7 +276,15 @@ Page({
 			_this.setData({
 				device_customization: true,
 			})
+
+			//开始搜索蓝牙
+			xBlufi.notifyStartDiscoverBle({ 'isStart': true });
 		} else {
+			if (_this.data.bluetooth_searching){
+				xBlufi.notifyStartDiscoverBle({ 'isStart': false });
+			}
+
+			//让其他方块隐藏
 			_this.setData({
 				device_customization: false,
 			})
@@ -298,29 +325,32 @@ Page({
 		})
 	},
 
-	start_search: function () {
-		//开始蓝牙搜索
-		if (_this.data.searching) {
-			xBlufi.notifyStartDiscoverBle({ 'isStart': false })
-		} else {
-			xBlufi.notifyStartDiscoverBle({ 'isStart': true })
-		}
-	},
-
 	start_connect: function () {
 		if (_this.data.wifi_pwd) {
-			//停止搜索
-			xBlufi.notifyStartDiscoverBle({
-				'isStart': false
-			})
+			if(_this.data.device_customization){
+				//自定义的话自动搜索，点击连接就停止搜索
+				if (_this.data.bluetooth_searching){
+					xBlufi.notifyStartDiscoverBle({
+						'isStart': false
+					})
 
-			let name = _this.data.bluetooth_name
-			xBlufi.notifyConnectBle({
-				isStart: true,
-				deviceId: _this.data.bluetooth_id,
-				name
-			});
-			console.log(_this.data.bluetooth_name, _this.data.bluetooth_id)
+					//发送蓝牙连接请求
+					let name = _this.data.bluetooth_name
+					xBlufi.notifyConnectBle({
+						isStart: true,
+						deviceId: _this.data.bluetooth_id,
+						name
+					});
+					console.log(_this.data.bluetooth_name, _this.data.bluetooth_id);
+				}
+			}else{
+				//如果是选择了特定产品，那么点击开始的时候才开始搜索
+				if (_this.data.bluetooth_searching) {
+					xBlufi.notifyStartDiscoverBle({ 'isStart': false })
+				} else {
+					xBlufi.notifyStartDiscoverBle({ 'isStart': true })
+				}
+			}
 		} else {
 			wx.showToast({ title: "请输入WIFI密码", icon: "none" });
 		}

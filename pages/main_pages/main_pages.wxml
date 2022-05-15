@@ -117,11 +117,6 @@
 	</view>
 </view>
 
-<!-- 开始扫描按钮 -->
-<button class="start_search" type="primary" bindtap="start_search" style = "margin-top:40px;width:85%;background-color: rgb(251, 187, 45);">
-    开始扫描
-</button>
-
 <!-- 开始连接按钮 -->
 <button class="start_search" type="primary" bindtap="start_connect" style = "margin-top:20px;margin-bottom:30px;width:85%;background-color: rgb(251, 187, 45);">
     开始连接
