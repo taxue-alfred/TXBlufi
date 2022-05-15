@@ -1,4 +1,3 @@
-const app = getApp()
 var xBlufi = require("../../utils/blufi/xBlufi.js");
 var _this = null;
 
@@ -37,16 +36,73 @@ Page({
 	 */
 	onLoad(options) {
 		_this = this;
-		
+
+		//abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRESTUVWXYZ1234567890,./;'`-=~!@#$%%^&*()_+{}:"<>?[]\|踏雪无痕 项目已开源 特别感谢 半颗心脏 主页 关于 产品选择 蓝牙选择 WIFI名称  密码输入 自定义 の 工具箱 所属
+
+		//设置字体
+		wx.loadFontFace({
+			family: "alifont",
+			source: 'url("https://at.alicdn.com/t/webfont_5f4sxhxvp76.ttf")',
+		});
+
+		//获取已连接WIFI名称
+		wx.startWifi({
+			success: (res) => {
+				wx.getConnectedWifi({
+					success: (result) => {
+						if (result.wifi.SSID.indexOf("5G") == -1) {
+							_this.setData({
+								wifi_ssid: result.wifi.SSID,
+								wifi_list: [result.wifi.SSID], //这里WXML需要数组形式进行显示
+							})
+						} else {
+							wx.showToast({
+								title: '请切换2.4G网络',
+								icon: 'none',
+								duration: 3000
+							})
+						}
+					},
+				})
+			},
+		})
+
+		//检测蓝牙授权
+		wx.getSetting({
+			success: (res) => {
+				console.log(res.authSetting)
+				//判断是不是有'scope.bluetooth'属性
+				if (res.authSetting.hasOwnProperty('scope.bluebooth')) {
+					//如果属性存在，并且为false的话，对其进行弹窗授权
+					if (!res.authSetting['scpoe.bluetooth']) {
+						wx.openSetting({
+							success: (res) => {
+								console.log(res.authSetting)
+							}
+						})
+					}
+				} else {
+					//scope.bluetootch属性不存在，需要进行授权
+					wx.authorize({
+						scope: 'scope.bluetooth',
+						success: () => {
+							//用户已经同意小程序使用手机蓝牙功能，后续调用不会弹窗询问
+							console.log(res.authSetting)
+						}
+					})
+				}
+			}
+		})
+
 		//启用xBlufi核心
 		xBlufi.initXBlufi(1); //指定为微信小程序使用
 		console.log("xBlufi", xBlufi.XMQTT_SYSTEM);
 		xBlufi.listenDeviceMsgEvent(true, _this.funListenDeviceMsgEvent); //设置设备监听信息事件
 	},
 
-	funListenDeviceMsgEvent:function(options){
-		switch(options.type){
-			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS:
+	funListenDeviceMsgEvent: function (options) {
+		switch (options.type) {
+			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS: //获取列表
 				if (options.result) {
 					for (let i = 0; i < options.data.length; i++) {
 						//筛选name不是空的设备加入到设备列表里面
@@ -69,19 +125,25 @@ Page({
 				}
 				break;
 
-			case xBlufi.XBLUFI_TYPE.TYPE_CONNECTED:
+			case xBlufi.XBLUFI_TYPE.TYPE_CONNECTED: //是否连接成功
 				console.log("连接回调:", JSON.stringify(options));
-				if(options.result){
-					wx.showToast({ title:"连接蓝牙成功", icon:"none"});
-					console.log("跳转", options.data.deviceId, options.data.name);
-					wx.navigateTo({
-						url: '../device/device?deviceId=' + options.data.deviceId + '&name=' + options.data.name,
+				if (options.result) {
+					wx.showToast({ title: "连接蓝牙成功", icon: "none" });
+					
+					//蓝牙连接成功后初始化ESP相关配置
+					xBlufi.notifyInitBleEsp32({
+						deviceId: options.data.deviceId //使用options的data，防止用户误操作滑块造成deviceid不匹配
 					})
-				}else{
-					wx.showToast({title:"连接蓝牙失败", icon:"none"});
+				} else {
+					wx.showToast({ title: "连接蓝牙失败", icon: "none" });
 				}
 				break;
-			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_START:
+
+			case xBlufi.XBLUFI_TYPE.TYPE_INIT_ESP32_RESULT://初始化ESP结果
+				console.log("初始化结果: ", JSON.stringify(options));//深拷贝
+				break;
+
+			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_START: //获取设备列表前动作
 				if (!options.result) {
 					console.log("蓝牙未开启 => ", options);
 					wx.showToast({ title: "蓝牙未开启", icon: "none" });
@@ -91,7 +153,7 @@ Page({
 				}
 				break;
 
-			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_STOP:
+			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_STOP: //蓝牙搜索设备是否停止
 				if (options.result) {
 					console.log("蓝牙已停止搜索");
 				} else {
@@ -103,16 +165,16 @@ Page({
 	},
 
 	product_Change: function (e) {
-		_this.setData({ 
+		_this.setData({
 			product_name_index: e.detail.value,
 			product_name: _this.data.products[e.detail.value]
 		})
-		
-		if(_this.data.product_name == "自定义"){
+
+		if (_this.data.product_name == "自定义") {
 			_this.setData({
 				device_customization: true,
 			})
-		}else{
+		} else {
 			_this.setData({
 				device_customization: false,
 			})
@@ -147,7 +209,7 @@ Page({
 		})
 	},
 
-	start_search:function(){
+	start_search: function () {
 		//开始蓝牙搜索
 		if (_this.data.searching) {
 			xBlufi.notifyStartDiscoverBle({ 'isStart': false })
@@ -156,19 +218,19 @@ Page({
 		}
 	},
 
-	start_connect:function(){
+	start_connect: function () {
 		//停止搜索
 		xBlufi.notifyStartDiscoverBle({
 			'isStart': false
-		  })
-		
-		  let name = _this.data.bluetooth_name
-		  xBlufi.notifyConnectBle({
+		})
+
+		let name = _this.data.bluetooth_name
+		xBlufi.notifyConnectBle({
 			isStart: true,
 			deviceId: _this.data.bluetooth_id,
 			name
-		  });
-		  console.log(_this.data.bluetooth_name, _this.data.bluetooth_id)
+		});
+		console.log(_this.data.bluetooth_name, _this.data.bluetooth_id)
 	},
 
 	/**
