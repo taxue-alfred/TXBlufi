@@ -204,6 +204,15 @@ Page({
 				}
 				break;
 
+			case xBlufi.XBLUFI_TYPE.TYPE_RECIEVE_CUSTON_DATA: //接收到来自设备的自定义信息, CUSTON好像是拼写错误
+				console.log("收到来自设备的自定义数据: ", options.data);
+				wx.showModal({
+					title:"来自设备的自定义数据",
+					content: `${options.data}`,
+					showCancel: false,
+				})
+				break;
+
 			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_START: //获取设备列表前动作
 				if (!options.result) {
 					console.log("蓝牙未开启 => ", options);
@@ -211,6 +220,16 @@ Page({
 				} else {
 					console.log("蓝牙已正常打开");
 					_this.setData({ bluetooth_searching: true });
+				}
+				break;
+
+			case xblufi.XBLUFI_TYPE.TYPE_STATUS_CONNECTED: //连接状态检测
+				if(!options.result){
+					wx.showModal({
+						title: "蓝牙连接断开",
+						content: "请重新配网",
+						showCancel: false,
+					})
 				}
 				break;
 
