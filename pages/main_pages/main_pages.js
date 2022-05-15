@@ -27,6 +27,9 @@ Page({
 		//状态定义
 		bluetooth_searching: false,
 		device_customization: false,
+		button_dis_state: false,
+		button_str: "开始连接",
+		button_loading: false,
 		//数据定义
 		product_name_index: 0,
 		product_name: "",
@@ -131,15 +134,29 @@ Page({
 						bluetooth_name_list: _this.data.bluetooth_name_list,
 						//将下标为0的蓝牙设备赋值给变量
 						bluetooth_name: _this.data.bluetooth_name_list[_this.data.bluetooth_select_index],
-						bluetooth_id: _this.data.bluetooth_deviceId_list[_this.data.bluetooth_select_index]
+						bluetooth_id: _this.data.bluetooth_deviceId_list[_this.data.bluetooth_select_index],
+						//按钮状态改变
+						button_str: "正在搜索蓝牙...",
+						button_loading: true,
+						button_dis_state: true
 					})
 					console.log(_this.data.bluetooth_name_list, _this.data.bluetooth_deviceId_list);
 
+					//判断是不是自定义设备，如果是的话直接显示"开始连接"
+					if (_this.data.device_customization) {
+						_this.setData({
+							//按钮状态改变
+							button_str: "开始连接",
+							button_loading: false,
+							button_dis_state: false
+						})
+					}
+
 					//对于停止搜索的时机进行判断,如果包含被定义的设备名称，那么就停止搜索
-					if(!_this.data.device_customization){
+					if (!_this.data.device_customization) {
 						//蓝牙名称和设备名称的index是相同的，所以直接用设备名称下标查找
-						if(_this.data.bluetooth_name_list.includes(_this.data.products_bluetooth_name[_this.data.product_name_index])){
-							if (_this.data.bluetooth_searching){
+						if (_this.data.bluetooth_name_list.includes(_this.data.products_bluetooth_name[_this.data.product_name_index])) {
+							if (_this.data.bluetooth_searching) {
 								/*注意这里有一个小bug但是不影响使用，如果是使用已经定义好了的产品，由于目前处在列表搜索的case中
 								列表不停的更新，从而带来的就是多次发送停止搜索命令，多次发送停止搜索命令又会到达已经停止的case中，
 								（具体详见下面的case），这样的话就会引发多次发送连接请求，但是不影响使用，设备只会选择一个进行连接，
@@ -157,6 +174,12 @@ Page({
 				if (options.result) {
 					console.log("蓝牙连接成功, 准备发送ESP初始化配置信息...");
 					wx.showToast({ title: "蓝牙连接成功", icon: "none" });
+					_this.setData({
+						//按钮状态改变
+						button_str: "蓝牙连接成功, 准备发送ESP初始化配置信息...",
+						button_loading: true,
+						button_dis_state: true
+					})
 
 					//蓝牙连接成功后初始化ESP相关配置
 					xBlufi.notifyInitBleEsp32({
@@ -173,6 +196,12 @@ Page({
 				if (options.result) {
 					console.log("ESP配置初始化成功, 准备发送WIFI信息...");
 					console.log("WIFI配置信息:", _this.data.wifi_ssid, _this.data.wifi_pwd);
+					_this.setData({
+						//按钮状态改变
+						button_str: "ESP配置初始化成功...准备发送WIFI信息...",
+						button_loading: true,
+						button_dis_state: true
+					});
 
 					//初始化成功之后发送WIFI名称和密码
 					xBlufi.notifySendRouterSsidAndPassword({
@@ -194,6 +223,7 @@ Page({
 				if (options.result) {
 					if (options.data.progress == 100) {
 						console.log("WIFI配置成功...");
+
 						//将密码存储，用户第二次使用的时候自动填写
 						wx.setStorageSync('_this.data.wifi_ssid', '_this.data.wifi_pwd');
 
@@ -212,6 +242,13 @@ Page({
 							confirmText: '确定',
 							confirmColor: '#fbad32',
 							success: (result) => {
+								_this.setData({
+									//按钮状态改变
+									button_str: "开始连接", //连接成功所以回归原始状态
+									button_loading: false,
+									button_dis_state: false
+								});
+
 								//跳转到关于页面
 								wx.switchTab({ url: '../about_me/about_me' });
 							},
@@ -220,7 +257,7 @@ Page({
 						console.log("WIFI配置失败!");
 						wx.showModal({
 							title: '配网失败',
-							content: '请尝试重启设备, 或者检查WIFI密码是否正确',
+							content: '请尝试重启被配网设备, 或检查WIFI密码是否正确',
 							showCancel: false,
 							confirmText: '确定',
 							confirmColor: '#e74033',
@@ -257,6 +294,14 @@ Page({
 						content: "请重新配网",
 						showCancel: false,
 						confirmColor: '#e74033',
+						success: (result) => {
+							_this.setData({
+								//按钮状态改变
+								button_str: "开始连接", //连接失败重新配网回归原始状态
+								button_loading: false,
+								button_dis_state: false
+							});
+						}
 					})
 				}
 				break;
@@ -267,22 +312,29 @@ Page({
 					_this.setData({ bluetooth_searching: false });
 
 					//蓝牙停止搜索之后发起连接请求
-					if(!_this.data.device_customization){
+					if (!_this.data.device_customization) {
 						//如果是已经定义了产品蓝牙设备则需要进一步处理
 						//在可用的蓝牙列表里寻找出已经定义产品蓝牙名称的下标
 						let ble_list_index = getArrayIndex(_this.data.bluetooth_name_list, _this.data.products_bluetooth_name[_this.data.product_name_index]);
-						if(ble_list_index < 0){
-							console.log("为找到产品对应的蓝牙设备!");
-						}else{
+						if (ble_list_index < 0) {
+							console.log("未找到产品对应的蓝牙设备!");
+						} else {
 							let name = _this.data.bluetooth_name_list[ble_list_index]; //获取对应下标名称
 							let ble_id = _this.data.bluetooth_deviceId_list[ble_list_index]; //获取对应下标ID
 							xBlufi.notifyConnectBle({
 								isStart: true,
 								deviceId: ble_id,
 								name
+							});
+
+							_this.setData({
+								//按钮状态改变
+								button_str: "开始连接蓝牙...",
+								button_loading: true,
+								button_dis_state: true
 							})
 						}
-					}else{
+					} else {
 						//产品自定义用data中的数据直接连接
 						let name = _this.data.bluetooth_name
 						xBlufi.notifyConnectBle({
@@ -291,6 +343,13 @@ Page({
 							name
 						});
 						console.log(_this.data.bluetooth_name, _this.data.bluetooth_id);
+
+						_this.setData({
+							//按钮状态改变
+							button_str: "开始连接蓝牙...",
+							button_loading: true,
+							button_dis_state: true
+						})
 					}
 				} else {
 					console.log("蓝牙无法停止搜索");
@@ -313,7 +372,7 @@ Page({
 			//开始搜索蓝牙
 			xBlufi.notifyStartDiscoverBle({ 'isStart': true });
 		} else {
-			if (_this.data.bluetooth_searching){
+			if (_this.data.bluetooth_searching) {
 				xBlufi.notifyStartDiscoverBle({ 'isStart': false });
 			}
 
@@ -360,14 +419,14 @@ Page({
 
 	start_connect: function () {
 		if (_this.data.wifi_pwd) {
-			if(_this.data.device_customization){
+			if (_this.data.device_customization) {
 				//自定义的话自动搜索，点击连接就停止搜索
-				if (_this.data.bluetooth_searching){
+				if (_this.data.bluetooth_searching) {
 					xBlufi.notifyStartDiscoverBle({
 						'isStart': false
 					})
 				}
-			}else{
+			} else {
 				//如果是选择了特定产品，那么点击开始的时候才开始搜索
 				if (_this.data.bluetooth_searching) {
 					xBlufi.notifyStartDiscoverBle({ 'isStart': false })
