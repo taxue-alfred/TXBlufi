@@ -1,6 +1,16 @@
 var xBlufi = require("../../utils/blufi/xBlufi.js");
 var _this = null;
 
+//通过数组元素寻找下标函数
+function getArrayIndex(array, str) {
+	for (var i = 0; i < array.length; i++) {
+		if (array[i] === str) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 Page({
 
 	/**
@@ -125,21 +135,17 @@ Page({
 					})
 					console.log(_this.data.bluetooth_name_list, _this.data.bluetooth_deviceId_list);
 
-					//对于停止搜索的时机进行判断
-					if(_this.data.device_customization){
-						//如果包含被定义的设备名称，那么就停止搜索, 蓝牙名称和设备名称的index是相同的，所以直接用设备名称下标查找
+					//对于停止搜索的时机进行判断,如果包含被定义的设备名称，那么就停止搜索
+					if(!_this.data.device_customization){
+						//蓝牙名称和设备名称的index是相同的，所以直接用设备名称下标查找
 						if(_this.data.bluetooth_name_list.includes(_this.data.products_bluetooth_name[_this.data.product_name_index])){
 							if (_this.data.bluetooth_searching){
+								/*注意这里有一个小bug但是不影响使用，如果是使用已经定义好了的产品，由于目前处在列表搜索的case中
+								列表不停的更新，从而带来的就是多次发送停止搜索命令，多次发送停止搜索命令又会到达已经停止的case中，
+								（具体详见下面的case），这样的话就会引发多次发送连接请求，但是不影响使用，设备只会选择一个进行连接，
+								看到蓝牙连接错的的报错也没事儿，只要有一个连接到稍等一会儿就会看到连接成功的显示了；如果是自定义设备
+								由于逻辑问题则不存在此问题，自定义设备通知连接的代码并不在此处*/
 								xBlufi.notifyStartDiscoverBle({ 'isStart': false });
-
-								//发送蓝牙连接请求
-								let name = _this.data.bluetooth_name
-								xBlufi.notifyConnectBle({
-									isStart: true,
-									deviceId: _this.data.bluetooth_id,
-									name
-								});
-								console.log(_this.data.bluetooth_name, _this.data.bluetooth_id);
 							}
 						}
 					}
@@ -258,10 +264,37 @@ Page({
 			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_STOP: //蓝牙搜索设备是否停止
 				if (options.result) {
 					console.log("蓝牙已停止搜索");
+					_this.setData({ bluetooth_searching: false });
+
+					//蓝牙停止搜索之后发起连接请求
+					if(!_this.data.device_customization){
+						//如果是已经定义了产品蓝牙设备则需要进一步处理
+						//在可用的蓝牙列表里寻找出已经定义产品蓝牙名称的下标
+						let ble_list_index = getArrayIndex(_this.data.bluetooth_name_list, _this.data.products_bluetooth_name[_this.data.product_name_index]);
+						if(ble_list_index < 0){
+							console.log("为找到产品对应的蓝牙设备!");
+						}else{
+							let name = _this.data.bluetooth_name_list[ble_list_index]; //获取对应下标名称
+							let ble_id = _this.data.bluetooth_deviceId_list[ble_list_index]; //获取对应下标ID
+							xBlufi.notifyConnectBle({
+								isStart: true,
+								deviceId: ble_id,
+								name
+							})
+						}
+					}else{
+						//产品自定义用data中的数据直接连接
+						let name = _this.data.bluetooth_name
+						xBlufi.notifyConnectBle({
+							isStart: true,
+							deviceId: _this.data.bluetooth_id,
+							name
+						});
+						console.log(_this.data.bluetooth_name, _this.data.bluetooth_id);
+					}
 				} else {
 					console.log("蓝牙无法停止搜索");
 				}
-				_this.setData({ bluetooth_searching: false });
 				break;
 		}
 	},
@@ -269,7 +302,7 @@ Page({
 	product_Change: function (e) {
 		_this.setData({
 			product_name_index: e.detail.value,
-			product_name: _this.data.products[e.detail.value]
+			product_name: _this.data.products[e.detail.value],
 		})
 
 		if (_this.data.product_name == "自定义") {
@@ -333,15 +366,6 @@ Page({
 					xBlufi.notifyStartDiscoverBle({
 						'isStart': false
 					})
-
-					//发送蓝牙连接请求
-					let name = _this.data.bluetooth_name
-					xBlufi.notifyConnectBle({
-						isStart: true,
-						deviceId: _this.data.bluetooth_id,
-						name
-					});
-					console.log(_this.data.bluetooth_name, _this.data.bluetooth_id);
 				}
 			}else{
 				//如果是选择了特定产品，那么点击开始的时候才开始搜索
