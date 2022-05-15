@@ -139,7 +139,7 @@ Page({
 				}
 				break;
 
-			case xBlufi.XBLUFI_TYPE.TYPE_INIT_ESP32_RESULT://初始化ESP结果
+			case xBlufi.XBLUFI_TYPE.TYPE_INIT_ESP32_RESULT://初始化ESP配置结果
 				console.log("初始化结果: ", JSON.stringify(options));//深拷贝
 				break;
 
@@ -219,18 +219,23 @@ Page({
 	},
 
 	start_connect: function () {
-		//停止搜索
-		xBlufi.notifyStartDiscoverBle({
-			'isStart': false
-		})
+		if(_this.data.wifi_pwd){
+			//停止搜索
+			xBlufi.notifyStartDiscoverBle({
+				'isStart': false
+			})
 
-		let name = _this.data.bluetooth_name
-		xBlufi.notifyConnectBle({
-			isStart: true,
-			deviceId: _this.data.bluetooth_id,
-			name
-		});
-		console.log(_this.data.bluetooth_name, _this.data.bluetooth_id)
+			let name = _this.data.bluetooth_name
+			xBlufi.notifyConnectBle({
+				isStart: true,
+				deviceId: _this.data.bluetooth_id,
+				name
+			});
+			console.log(_this.data.bluetooth_name, _this.data.bluetooth_id)
+		}else{
+			wx.showToast({title: "请输入WIFI密码", icon:"none"});
+		}
+		
 	},
 
 	/**
