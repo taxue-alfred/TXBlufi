@@ -159,12 +159,13 @@ Page({
 					});
 				}
 				break;
+				
 			case xBlufi.XBLUFI_TYPE.TYPE_CONNECT_ROUTER_RESULT:
 				if(options.result){
 					if(options.data.progress == 100){
 						wx.showModal({
 							title: '配网成功',
-							content: '成功连接到WIFI [ ${options.data.ssid} ]',
+							content: `成功连接到WIFI [${options.data.ssid}]`, //注意这里不是字符串
 							showCancel: false,
 							confirmText: '确定',
 							confirmColor: '#fbad32',
