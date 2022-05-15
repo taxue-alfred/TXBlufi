@@ -169,6 +169,17 @@ Page({
 				if(options.result){
 					if(options.data.progress == 100){
 						console.log("WIFI配置成功...");
+						//将密码存储，用户第二次使用的时候自动填写
+						wx.setStorageSync('_this.data.wifi_ssid', '_this.data.wifi_pwd');
+
+						//发送用户自定义的数据, 在连接了ESP蓝牙之后，任何时候都可以调用
+						if(_this.data.user_custom_data){
+							console.log("发送用户自定义数据...", _this.data.user_custom_data);
+							xBlufi.notifySendCustomData({
+								customData: _this.data.user_custom_data,
+							});
+						}
+
 						wx.showModal({
 							title: '配网成功',
 							content: `成功连接到WIFI [${options.data.ssid}]`, //注意这里不是字符串
@@ -176,11 +187,6 @@ Page({
 							confirmText: '确定',
 							confirmColor: '#fbad32',
 							success: (result) => {
-								if (result.confirm) {
-									//将密码存储，用户第二次使用的时候自动填写
-									wx.setStorageSync('_this.data.wifi_ssid', '_this.data.wifi_pwd');
-								}
-
 								//跳转到关于页面
 								wx.switchTab({url: '../about_me/about_me'});
 							},
@@ -239,7 +245,7 @@ Page({
 	chip_Change: function (e) {
 		_this.setData({
 			chip_select_index: e.detail.value,
-			chip_name: chips[e.detail.value]
+			chip_name: _this.data.chips[e.detail.value]
 		})
 	},
 
@@ -261,6 +267,12 @@ Page({
 	pwd_input: function (e) {
 		_this.setData({
 			wifi_pwd: e.detail.value,
+		})
+	},
+
+	custom_text:function(e){
+		_this.setData({
+			user_custom_data:e.detail.value,
 		})
 	},
 
