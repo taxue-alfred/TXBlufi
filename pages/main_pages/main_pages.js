@@ -54,7 +54,9 @@ Page({
 							_this.setData({
 								wifi_ssid: result.wifi.SSID,
 								wifi_list: [result.wifi.SSID], //这里WXML需要数组形式进行显示
+								wifi_pwd: wx.getStorageSync(result.wifi.SSID),//从缓存获取对应的WIFI密码
 							})
+							console.log(_this.data.wifi_ssid, "Storage PWD:", _this.data.wifi_pwd);
 						} else {
 							wx.showToast({
 								title: '请切换2.4G网络',
@@ -98,14 +100,6 @@ Page({
 		xBlufi.initXBlufi(1); //指定为微信小程序使用
 		console.log("xBlufi", xBlufi.XMQTT_SYSTEM);
 		xBlufi.listenDeviceMsgEvent(true, _this.funListenDeviceMsgEvent); //设置设备监听信息事件
-	},
-
-	onshow: function(){
-		//调用第一次配网之后的WIFI密码缓存，如果没有则为空
-		_this.setData({
-			wifi_pwd: wx.getStorageSync(_this.data.wifi_ssid),
-		})
-		console.log("Storage PWD:", _this.data.wifi_pwd);
 	},
 
 	funListenDeviceMsgEvent: function (options) {
