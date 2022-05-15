@@ -1,7 +1,6 @@
 {
   "pages":[
     "pages/main_pages/main_pages",
-    "pages/device/device",
     "pages/about_me/about_me"
   ],
   "window":{

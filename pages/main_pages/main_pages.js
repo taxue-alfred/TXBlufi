@@ -132,7 +132,7 @@ Page({
 				if (options.result) {
 					console.log("蓝牙连接成功, 准备发送ESP初始化配置信息...");
 					wx.showToast({ title: "蓝牙连接成功", icon: "none" });
-					
+
 					//蓝牙连接成功后初始化ESP相关配置
 					xBlufi.notifyInitBleEsp32({
 						deviceId: options.data.deviceId //使用options的data，防止用户误操作滑块造成deviceid不匹配
@@ -145,16 +145,16 @@ Page({
 
 			case xBlufi.XBLUFI_TYPE.TYPE_INIT_ESP32_RESULT://初始化ESP配置结果
 				console.log("初始化结果: ", JSON.stringify(options));//深拷贝
-				if(options.result){
+				if (options.result) {
 					console.log("ESP配置初始化成功, 准备发送WIFI信息...");
-					console.log("WIFI配置信息:",_this.data.wifi_ssid, _this.data.wifi_pwd);
+					console.log("WIFI配置信息:", _this.data.wifi_ssid, _this.data.wifi_pwd);
 
 					//初始化成功之后发送WIFI名称和密码
 					xBlufi.notifySendRouterSsidAndPassword({
 						ssid: _this.data.wifi_ssid,
 						password: _this.data.wifi_pwd,
 					});
-				}else{
+				} else {
 					wx.showModal({
 						title: '初始化失败',
 						content: '请尝试重启设备',
@@ -164,16 +164,16 @@ Page({
 					});
 				}
 				break;
-				
+
 			case xBlufi.XBLUFI_TYPE.TYPE_CONNECT_ROUTER_RESULT:
-				if(options.result){
-					if(options.data.progress == 100){
+				if (options.result) {
+					if (options.data.progress == 100) {
 						console.log("WIFI配置成功...");
 						//将密码存储，用户第二次使用的时候自动填写
 						wx.setStorageSync('_this.data.wifi_ssid', '_this.data.wifi_pwd');
 
 						//发送用户自定义的数据, 在连接了ESP蓝牙之后，任何时候都可以调用
-						if(_this.data.user_custom_data){
+						if (_this.data.user_custom_data) {
 							console.log("发送用户自定义数据...", _this.data.user_custom_data);
 							xBlufi.notifySendCustomData({
 								customData: _this.data.user_custom_data,
@@ -188,10 +188,10 @@ Page({
 							confirmColor: '#fbad32',
 							success: (result) => {
 								//跳转到关于页面
-								wx.switchTab({url: '../about_me/about_me'});
+								wx.switchTab({ url: '../about_me/about_me' });
 							},
 						});
-					}else{
+					} else {
 						console.log("WIFI配置失败!");
 						wx.showModal({
 							title: '配网失败',
@@ -204,11 +204,11 @@ Page({
 				}
 				break;
 
-			//接收到来自设备的自定义信息, CUSTON好像是拼写错误，当用户发送自定义数据的时候，设备默认会将数据原样返回
-			case xBlufi.XBLUFI_TYPE.TYPE_RECIEVE_CUSTON_DATA: 
+			//接收到来自设备的自定义信息, CUSTON好像是拼写错误，当用户发送自定义数据的时候，设备默认会将数据原样返回,不能解析汉字
+			case xBlufi.XBLUFI_TYPE.TYPE_RECIEVE_CUSTON_DATA:
 				console.log("收到来自设备的自定义数据: ", options.data);
 				wx.showModal({
-					title:"来自设备的自定义数据",
+					title: "来自设备的自定义数据",
 					content: `${options.data}`,
 					showCancel: false,
 					confirmColor: '#fbad32',
@@ -226,7 +226,7 @@ Page({
 				break;
 
 			case xBlufi.XBLUFI_TYPE.TYPE_STATUS_CONNECTED: //连接状态检测
-				if(!options.result){
+				if (!options.result) {
 					wx.showModal({
 						title: "蓝牙连接断开",
 						content: "请重新配网",
@@ -292,9 +292,9 @@ Page({
 		})
 	},
 
-	custom_text:function(e){
+	custom_text: function (e) {
 		_this.setData({
-			user_custom_data:e.detail.value,
+			user_custom_data: e.detail.value,
 		})
 	},
 
@@ -308,7 +308,7 @@ Page({
 	},
 
 	start_connect: function () {
-		if(_this.data.wifi_pwd){
+		if (_this.data.wifi_pwd) {
 			//停止搜索
 			xBlufi.notifyStartDiscoverBle({
 				'isStart': false
@@ -321,10 +321,10 @@ Page({
 				name
 			});
 			console.log(_this.data.bluetooth_name, _this.data.bluetooth_id)
-		}else{
-			wx.showToast({title: "请输入WIFI密码", icon:"none"});
+		} else {
+			wx.showToast({ title: "请输入WIFI密码", icon: "none" });
 		}
-		
+
 	},
 
 	/**
