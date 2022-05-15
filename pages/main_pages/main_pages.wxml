@@ -96,7 +96,7 @@
 		
 		<view style="position: absolute;display: flex; flex-direction: column; width: 52%; height: 80%; margin-left: 45%;margin-top: 4%;">
 			<text style="font-family:alifont;font-size: large;font-weight:700;">密码输入</text>
-			<input placeholder="请输入WIFI密码" type="text" bindinput="pwd_input" password="true" style="width: 85%; height: 50px;margin-top: 3%;border-bottom:1px solid rgb(160, 160, 160);" placeholder-style="font-family:alifont">
+			<input value = "{{wifi_pwd}}" placeholder="请输入WIFI密码" type="text" bindinput="pwd_input" password="true" style="width: 85%; height: 50px;margin-top: 3%;border-bottom:1px solid rgb(160, 160, 160);" placeholder-style="font-family:alifont">
 			</input>
 		</view>
 	</view>

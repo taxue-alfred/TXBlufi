@@ -100,6 +100,14 @@ Page({
 		xBlufi.listenDeviceMsgEvent(true, _this.funListenDeviceMsgEvent); //设置设备监听信息事件
 	},
 
+	onshow: function(){
+		//调用第一次配网之后的WIFI密码缓存，如果没有则为空
+		_this.setData({
+			wifi_pwd: wx.getStorageSync(_this.data.wifi_ssid),
+		})
+		console.log("Storage PWD:", _this.data.wifi_pwd);
+	},
+
 	funListenDeviceMsgEvent: function (options) {
 		switch (options.type) {
 			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS: //获取列表
@@ -128,21 +136,23 @@ Page({
 			case xBlufi.XBLUFI_TYPE.TYPE_CONNECTED: //是否连接成功
 				console.log("连接回调:", JSON.stringify(options));
 				if (options.result) {
-					wx.showToast({ title: "连接蓝牙成功", icon: "none" });
+					console.log("蓝牙连接成功, 准备发送ESP初始化配置信息...");
+					wx.showToast({ title: "蓝牙连接成功", icon: "none" });
 					
 					//蓝牙连接成功后初始化ESP相关配置
 					xBlufi.notifyInitBleEsp32({
 						deviceId: options.data.deviceId //使用options的data，防止用户误操作滑块造成deviceid不匹配
 					})
 				} else {
-					wx.showToast({ title: "连接蓝牙失败", icon: "none" });
+					console.log("蓝牙连接失败!");
+					wx.showToast({ title: "蓝牙连接失败", icon: "none" });
 				}
 				break;
 
 			case xBlufi.XBLUFI_TYPE.TYPE_INIT_ESP32_RESULT://初始化ESP配置结果
 				console.log("初始化结果: ", JSON.stringify(options));//深拷贝
 				if(options.result){
-					console.log("ESP配置初始化成功");
+					console.log("ESP配置初始化成功, 准备发送WIFI信息...");
 
 					//初始化成功之后发送WIFI名称和密码
 					xBlufi.notifySendRouterSsidAndPassword({
@@ -163,6 +173,7 @@ Page({
 			case xBlufi.XBLUFI_TYPE.TYPE_CONNECT_ROUTER_RESULT:
 				if(options.result){
 					if(options.data.progress == 100){
+						console.log("WIFI配置成功...");
 						wx.showModal({
 							title: '配网成功',
 							content: `成功连接到WIFI [${options.data.ssid}]`, //注意这里不是字符串
@@ -172,7 +183,7 @@ Page({
 							success: (result) => {
 								if (result.confirm) {
 									//将密码存储，用户第二次使用的时候自动填写
-									wx.setStorage({
+									wx.setStorageSync({
 										key:_this.data.wifi_ssid, 
 										data: _this.data.wifi_pwd
 									});
@@ -180,6 +191,7 @@ Page({
 							},
 						});
 					}else{
+						console.log("WIFI配置失败!");
 						wx.showModal({
 							title: '配网失败',
 							content: '请尝试重启设备, 或者检查WIFI密码是否正确',
