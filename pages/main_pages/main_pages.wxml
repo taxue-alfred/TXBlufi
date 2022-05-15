@@ -1,0 +1,128 @@
+<!-- 介绍方块 -->
+<view class = "box" style="height: 160px;">
+    <image src="../../images/background.png" style="width: 100%;height: 100%;border-radius: 10px;" mode="aspectFill"></image>
+	<text class = "title" style="color: white;font-size: 22px;">TXBluFi Quick Configure</text>
+	
+	<view class = "welcome_block">
+		
+		<view style="height: 90px;width: 4px;display: block;background-color: rgb(0, 255, 157);border-radius: 5px; margin-right: 8px;"></view>
+		
+		<view style=" display: flex; flex-direction: column; font-family: alifont;">
+			<text style="font-size: 17px;margin-bottom: 10px;margin-top: 3px;color: rgba(0, 0, 0, 0.6);">踏雪Alfred</text>
+			<text style="font-size: 14px;margin-bottom: 10px;color: rgba(216, 255, 178, 0.6);">所属: 踏雪Alfredの工具箱</text>
+			<text style="font-size: 14px;color: rgba(216, 255, 178, 0.6);" selectable="true">Github: github.com/taxue-alfred</text>
+		</view>
+	</view>
+</view>
+
+<!-- 产品选择方块 -->
+<view class = "box">
+	<view style="position: absolute;width: 100%; height: 100%;">
+		<image class="show_icon "src="../../images/product_box.svg"></image>
+		
+		<view style="position: absolute;width: 1px;height: 70%;background-color: rgb(236, 236, 236); margin-left: 38%;margin-top: 5%;"></view>
+		
+		<view style="position: absolute;display: flex; flex-direction: column; width: 52%; height: 80%; margin-left: 45%;margin-top: 4%;">
+			<text style="font-family:alifont;font-size: large;font-weight:700;">产品选择</text>
+			<picker-view indicator-style="height: 45px;" immediate-change="true"  style="width: 85%; height: 280px;margin-top: 3%;font-family:alifont;" bindchange="product_Change">
+				<picker-view-column>
+					<view wx:for="{{products}}" wx:key="products" style="line-height: 45px; text-align: center;">{{item}}</view>
+				</picker-view-column>
+			</picker-view>
+		</view>
+	</view>
+</view>
+
+<!-- 芯片选择方块 -->
+<view class = "box" hidden="{{!device_customization}}">
+	<view style="position: absolute;width: 100%; height: 100%;">
+		<image class="show_icon "src="../../images/chip.svg"></image>
+		
+		<view style="position: absolute;width: 1px;height: 70%;background-color: rgb(236, 236, 236); margin-left: 38%;margin-top: 5%;"></view>
+		
+		<view style="position: absolute;display: flex; flex-direction: column; width: 52%; height: 80%; margin-left: 45%;margin-top: 4%;">
+			<text style="font-family:alifont;font-size: large;font-weight:700;">芯片选择</text>
+			<picker-view indicator-style="height: 45px;" immediate-change="true"  style="width: 85%; height: 280px;margin-top: 3%;font-family:alifont;" bindchange="chip_Change">
+				<picker-view-column>
+					<view wx:for="{{chips}}" wx:key="chips" style="line-height: 45px; text-align: center;">{{item}}</view>
+				</picker-view-column>
+			</picker-view>
+		</view>
+	</view>
+</view>
+
+<!-- 蓝牙选择方块 -->
+<view class = "box" hidden="{{!device_customization}}">
+	<view style="position: absolute;width: 100%; height: 100%;">
+		<image class="show_icon "src="../../images/bluetooth.svg"></image>
+		
+		<view style="position: absolute;width: 1px;height: 70%;background-color: rgb(236, 236, 236); margin-left: 38%;margin-top: 5%;"></view>
+		
+		<view style="position: absolute;display: flex; flex-direction: column; width: 52%; height: 80%; margin-left: 45%;margin-top: 4%;">
+			<text style="font-family:alifont;font-size: large;font-weight:700;">蓝牙选择</text>
+			<picker-view indicator-style="height: 45px;" immediate-change="true"  style="width: 85%; height: 280px;margin-top: 3%;font-family:alifont;" bindchange="bluetooth_Change">
+				<picker-view-column>
+					<view wx:for="{{bluetooth_name_list}}" wx:key="bluetooth_name_list" style="line-height: 45px; text-align: center;">{{item}}</view>
+				</picker-view-column>
+			</picker-view>
+		</view>
+	</view>
+</view>
+
+<!-- WIFI名称方块 -->
+<view class = "box">
+	<view style="position: absolute;width: 100%; height: 100%;">
+		<image class="show_icon "src="../../images/router.svg"></image>
+		
+		<view style="position: absolute;width: 1px;height: 70%;background-color: rgb(236, 236, 236); margin-left: 38%;margin-top: 5%;"></view>
+		
+		<view style="position: absolute;display: flex; flex-direction: column; width: 52%; height: 80%; margin-left: 45%;margin-top: 4%;">
+			<text style="font-family:alifont;font-size: large;font-weight:700;">WIFI名称</text>
+			<picker-view indicator-style="height: 45px;" immediate-change="true"  style="width: 85%; height: 280px;margin-top: 3%;font-family:alifont;" bindchange="wifi_name_Change">
+				<picker-view-column>
+					<view wx:for="{{wifi_list}}" wx:key="wifi_list" style="line-height: 45px; text-align: center;">{{item}}</view>
+				</picker-view-column>
+			</picker-view>
+		</view>
+	</view>
+</view>
+
+<!-- 密码输入方块 -->
+<view class = "box">
+	<view style="position: absolute;width: 100%; height: 100%;">
+		<image class="show_icon "src="../../images/keyhole.svg"></image>
+		
+		<view style="position: absolute;width: 1px;height: 70%;background-color: rgb(236, 236, 236); margin-left: 38%;margin-top: 5%;"></view>
+		
+		<view style="position: absolute;display: flex; flex-direction: column; width: 52%; height: 80%; margin-left: 45%;margin-top: 4%;">
+			<text style="font-family:alifont;font-size: large;font-weight:700;">密码输入</text>
+			<input placeholder="请输入WIFI密码" type="text" bindinput="pwd_input" password="true" style="width: 85%; height: 50px;margin-top: 3%;border-bottom:1px solid rgb(160, 160, 160);" placeholder-style="font-family:alifont">
+			</input>
+		</view>
+	</view>
+</view>
+
+<!-- 自定发送内容输入方块 -->
+<view class = "box" hidden="{{!device_customization}}">
+	<view style="position: absolute;width: 100%; height: 100%;">
+		<image class="show_icon "src="../../images/custom_text.svg"></image>
+		
+		<view style="position: absolute;width: 1px;height: 70%;background-color: rgb(236, 236, 236); margin-left: 38%;margin-top: 5%;"></view>
+		
+		<view style="position: absolute;display: flex; flex-direction: column; width: 52%; height: 80%; margin-left: 45%;margin-top: 4%;">
+			<text style="font-family:alifont;font-size: large;font-weight:700;">发送内容</text>
+			<input placeholder="自定额外发送内容" type="text" bindinput="custom_text" style="width: 85%; height: 50px;margin-top: 3%;border-bottom:1px solid rgb(160, 160, 160);"	placeholder-style="font-family:alifont">
+			</input>
+		</view>
+	</view>
+</view>
+
+<!-- 开始扫描按钮 -->
+<button class="start_search" type="primary" bindtap="start_search" style = "margin-top:40px;width:85%;background-color: rgb(251, 187, 45);">
+    开始扫描
+</button>
+
+<!-- 开始连接按钮 -->
+<button class="start_search" type="primary" bindtap="start_connect" style = "margin-top:20px;margin-bottom:30px;width:85%;background-color: rgb(251, 187, 45);">
+    开始连接
+</button>

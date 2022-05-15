@@ -1,0 +1,180 @@
+const app = getApp()
+var xBlufi = require("../../utils/blufi/xBlufi.js");
+var _this = null;
+
+Page({
+
+	/**
+	 * 页面的初始数据
+	 */
+	data: {
+		//全局数据Data定义
+		products: ["MediaStateBoard", "CloudMedicalKit", "自定义"],
+		products_bludetooth_name: ["MediaStateBoard", "CloudMedicalKit"],
+		chips: ["ESP32", "ESP32-C3", "ESP32-S2", "ESP32-S3"],
+		bluetooth_name_list: [],
+		bluetooth_deviceId_list: [],
+		wifi_list: ["TestWiFi"],
+		//状态定义
+		bluetooth_searching: false,
+		device_customization: false,
+		//数据定义
+		product_name_index: 0,
+		product_name: "",
+		chip_select_index: 0,
+		chip_name: "",
+		bluetooth_select_index: 0,
+		bluetooth_id: "",
+		bluetooth_name: "",
+		wifi_ssid_index: 0,
+		wifi_ssid: "",
+		wifi_pwd: "",
+		user_custom_data: "",
+	},
+
+	/**
+	 * 生命周期函数--监听页面加载
+	 */
+	onLoad(options) {
+		_this = this;
+		
+		//启用xBlufi核心
+		xBlufi.initXBlufi(1); //指定为微信小程序使用
+		console.log("xBlufi", xBlufi.XMQTT_SYSTEM);
+		xBlufi.listenDeviceMsgEvent(true, _this.funListenDeviceMsgEvent); //设置设备监听信息事件
+	},
+
+	funListenDeviceMsgEvent:function(options){
+		switch(options.type){
+			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS:
+				if (options.result) {
+					for (let i = 0; i < options.data.length; i++) {
+						//筛选name不是空的设备加入到设备列表里面
+						if (options.data[i].name != "") {
+							//查找是不是加入过了
+							if (!_this.data.bluetooth_name_list.includes(options.data[i].name)) {
+								//这两个必须一起加进去，便于定位数据
+								_this.data.bluetooth_name_list.push(options.data[i].name);
+								_this.data.bluetooth_deviceId_list.push(options.data[i].deviceId);
+							}
+						}
+					}
+					_this.setData({
+						bluetooth_name_list: _this.data.bluetooth_name_list,
+						//将下标为0的蓝牙设备赋值给变量
+						bluetooth_name: _this.data.bluetooth_name_list[_this.data.bluetooth_select_index],
+						bluetooth_id: _this.data.bluetooth_deviceId_list[_this.data.bluetooth_select_index]
+					})
+					console.log(_this.data.bluetooth_name_list, _this.data.bluetooth_deviceId_list);
+				}
+				break;
+
+			case xBlufi.XBLUFI_TYPE.TYPE_CONNECTED:
+				console.log("连接回调:", JSON.stringify(options));
+				if(options.result){
+					wx.showToast({ title:"连接蓝牙成功", icon:"none"});
+					console.log("跳转", options.data.deviceId, options.data.name);
+					wx.navigateTo({
+						url: '../device/device?deviceId=' + options.data.deviceId + '&name=' + options.data.name,
+					})
+				}else{
+					wx.showToast({title:"连接蓝牙失败", icon:"none"});
+				}
+				break;
+			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_START:
+				if (!options.result) {
+					console.log("蓝牙未开启 => ", options);
+					wx.showToast({ title: "蓝牙未开启", icon: "none" });
+				} else {
+					console.log("蓝牙已正常打开");
+					_this.setData({ bluetooth_searching: true });
+				}
+				break;
+
+			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_STOP:
+				if (options.result) {
+					console.log("蓝牙已停止搜索");
+				} else {
+					console.log("蓝牙无法停止搜索");
+				}
+				_this.setData({ bluetooth_searching: false });
+				break;
+		}
+	},
+
+	product_Change: function (e) {
+		_this.setData({ 
+			product_name_index: e.detail.value,
+			product_name: _this.data.products[e.detail.value]
+		})
+		
+		if(_this.data.product_name == "自定义"){
+			_this.setData({
+				device_customization: true,
+			})
+		}else{
+			_this.setData({
+				device_customization: false,
+			})
+		}
+	},
+
+	chip_Change: function (e) {
+		_this.setData({
+			chip_select_index: e.detail.value,
+			chip_name: chips[e.detail.value]
+		})
+	},
+
+	bluetooth_Change: function (e) {
+		_this.setData({
+			bluetooth_select_index: e.detail.value,
+			bluetooth_id: _this.data.bluetooth_deviceId_list[e.detail.value],
+			bluetooth_name: _this.data.bluetooth_name_list[e.detail.value]
+		})
+	},
+
+	wifi_name_Change: function (e) {
+		_this.setData({
+			wifi_ssid_index: e.detail.value,//当前WIFI只有一个
+			wifi_ssid: wifi_list[e.detail.value]
+		})
+	},
+
+	pwd_input: function (e) {
+		_this.setData({
+			wifi_pwd: e.detail.value,
+		})
+	},
+
+	start_search:function(){
+		//开始蓝牙搜索
+		if (_this.data.searching) {
+			xBlufi.notifyStartDiscoverBle({ 'isStart': false })
+		} else {
+			xBlufi.notifyStartDiscoverBle({ 'isStart': true })
+		}
+	},
+
+	start_connect:function(){
+		//停止搜索
+		xBlufi.notifyStartDiscoverBle({
+			'isStart': false
+		  })
+		
+		  let name = _this.data.bluetooth_name
+		  xBlufi.notifyConnectBle({
+			isStart: true,
+			deviceId: _this.data.bluetooth_id,
+			name
+		  });
+		  console.log(_this.data.bluetooth_name, _this.data.bluetooth_id)
+	},
+
+	/**
+	 * 生命周期函数--监听页面卸载
+	 */
+	onUnload() {
+		xBlufi.listenDeviceMsgEvent(false, _this.funListenDeviceMegEvent);
+	}
+})

@@ -1,0 +1,33 @@
+.box {	
+	width: 90%;
+	height: 120px;
+	border-radius: 10px;
+	background-color:white;
+	box-shadow: 3px 3px 3px 1px #ccc;
+	position: relative;
+	margin: auto;
+	margin-bottom: 20px;
+}
+
+.box .title{
+	position: absolute;
+	left: 8%;
+	top: 8%;
+	font-family:"alifont"
+}
+
+.welcome_block{
+	display: flex;
+	position: absolute;
+	top: 30%;
+	left: 13%;
+}
+
+.box .show_icon{
+	width: 25%;
+	height: 65%;
+	margin-top: 6%;
+	margin-left: 7%;
+	/* background-color: black; */
+	position: absolute;
+}

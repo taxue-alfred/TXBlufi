@@ -1,0 +1,26 @@
+<!--pages/about_me/about_me.wxml-->
+<view class = "box" style="height: 235px;">
+    <image src="../../images/background_aboutme.png" style="width: 100%;height: 100%;border-radius: 10px;" mode="aspectFill"></image>
+	<image src="../../images/txwh_icon.jpg" model = "aspectFit" style="position: absolute; width: 90px;height: 90px;left: 8%;top: 10%;border-radius: 100px;"></image>
+	
+	<view style="position: absolute; height: 90px;width: 4px;display: block;background-color: rgb(245, 166, 35);border-radius: 5px;top:10%;left:39%"></view>
+	
+	<view style="font-family:alifont;display: flex; flex-direction: column; position: absolute; width: 50%; height: 80%;top: 10%; left: 45%;">
+		<text style="font-size: 20px; margin-bottom: 6%; color: rgb(250, 209, 38);">踏雪Alfred</text>
+		<text style="font-size: 15px; margin-bottom: 5%; color: rgb(255, 190, 121);" selectable="true">Bilibili: 踏雪Alfred</text>
+		<text style="font-size: 15px; margin-bottom: 5%; color: rgb(255, 190, 121);" selectable="true">www.taxue_alfred.top</text>
+	</view>
+	
+	<view style="position: absolute;width: 80%;height: 1px;background-color: rgb(236, 236, 236);left: 10%;top:56%"></view>
+	
+	<image src="../../images/icon.png" style="width:110px; height: 59px; position: absolute; left: 65%; top: 70%;"></image>
+
+	<view style="font-family:alifont;display: flex; flex-direction: column; position: absolute; width: 80%; height: 40%;top: 63%; left: 10%;">
+		<text style="font-size: 13px; margin-bottom:3%;color: white;">Core: xBlufi</text>
+		<text style="font-size: 13px; margin-bottom:3%;color: white;">本项目 TXBlufi 已开源</text>
+		<text style="font-size: 11px; margin-bottom:3%;color: white;" selectable="true">https://github.com/taxue-alfred/TXBlufi</text>
+	</view>
+</view>
+
+<text selectable="true" style="width:100%;font-family:alifont;font-size:11px;text-align: center;position: absolute; bottom: 3%;">特别感谢: @半颗心脏开源xBlufi项目 | https://github.com/xuhongv</text>
+
