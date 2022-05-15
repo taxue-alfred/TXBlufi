@@ -54,7 +54,7 @@ Page({
 							_this.setData({
 								wifi_ssid: result.wifi.SSID,
 								wifi_list: [result.wifi.SSID], //这里WXML需要数组形式进行显示
-								wifi_pwd: wx.getStorageSync(result.wifi.SSID),//从缓存获取对应的WIFI密码
+								wifi_pwd: wx.getStorageSync('result.wifi.SSID'),//从缓存获取对应的WIFI密码
 							})
 							console.log(_this.data.wifi_ssid, "Storage PWD:", _this.data.wifi_pwd);
 						} else {
@@ -147,6 +147,7 @@ Page({
 				console.log("初始化结果: ", JSON.stringify(options));//深拷贝
 				if(options.result){
 					console.log("ESP配置初始化成功, 准备发送WIFI信息...");
+					console.log("WIFI配置信息:",_this.data.wifi_ssid, _this.data.wifi_pwd);
 
 					//初始化成功之后发送WIFI名称和密码
 					xBlufi.notifySendRouterSsidAndPassword({
@@ -177,11 +178,11 @@ Page({
 							success: (result) => {
 								if (result.confirm) {
 									//将密码存储，用户第二次使用的时候自动填写
-									wx.setStorageSync({
-										key:_this.data.wifi_ssid, 
-										data: _this.data.wifi_pwd
-									});
+									wx.setStorageSync('_this.data.wifi_ssid', '_this.data.wifi_pwd');
 								}
+
+								//跳转到关于页面
+								wx.switchTab({url: '../about_me/about_me'});
 							},
 						});
 					}else{
