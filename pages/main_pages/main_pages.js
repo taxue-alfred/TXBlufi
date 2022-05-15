@@ -141,6 +141,53 @@ Page({
 
 			case xBlufi.XBLUFI_TYPE.TYPE_INIT_ESP32_RESULT://初始化ESP配置结果
 				console.log("初始化结果: ", JSON.stringify(options));//深拷贝
+				if(options.result){
+					console.log("ESP配置初始化成功");
+
+					//初始化成功之后发送WIFI名称和密码
+					xBlufi.notifySendRouterSsidAndPassword({
+						ssid: _this.data.wifi_ssid,
+						password: _this.data.wifi_pwd,
+					});
+				}else{
+					wx.showModal({
+						title: '初始化失败',
+						content: '请尝试重启设备',
+						showCancel: false,
+						confirmText: '确定',
+						confirmColor: '#e74033',
+					});
+				}
+				break;
+			case xBlufi.XBLUFI_TYPE.TYPE_CONNECT_ROUTER_RESULT:
+				if(options.result){
+					if(options.data.progress == 100){
+						wx.showModal({
+							title: '配网成功',
+							content: '成功连接到WIFI [ ${options.data.ssid} ]',
+							showCancel: false,
+							confirmText: '确定',
+							confirmColor: '#fbad32',
+							success: (result) => {
+								if (result.confirm) {
+									//将密码存储，用户第二次使用的时候自动填写
+									wx.setStorage({
+										key:_this.data.wifi_ssid, 
+										data: _this.data.wifi_pwd
+									});
+								}
+							},
+						});
+					}else{
+						wx.showModal({
+							title: '配网失败',
+							content: '请尝试重启设备, 或者检查WIFI密码是否正确',
+							showCancel: false,
+							confirmText: '确定',
+							confirmColor: '#e74033',
+						});
+					}
+				}
 				break;
 
 			case xBlufi.XBLUFI_TYPE.TYPE_GET_DEVICE_LISTS_START: //获取设备列表前动作
