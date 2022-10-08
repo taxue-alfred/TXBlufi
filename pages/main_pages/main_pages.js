@@ -163,6 +163,7 @@ Page({
 								看到蓝牙连接错的的报错也没事儿，只要有一个连接到稍等一会儿就会看到连接成功的显示了；如果是自定义设备
 								由于逻辑问题则不存在此问题，自定义设备通知连接的代码并不在此处*/
 								xBlufi.notifyStartDiscoverBle({ 'isStart': false });
+								//TODO: 这里要尽可能解决多次连接问题
 							}
 						}
 					}
@@ -224,6 +225,7 @@ Page({
 					if (options.data.progress == 100) {
 						console.log("WIFI配置成功...");
 
+						//TODO:这里好像存储不进去，还可能是其他原因
 						//将密码存储，用户第二次使用的时候自动填写
 						wx.setStorageSync('_this.data.wifi_ssid', '_this.data.wifi_pwd');
 
@@ -237,7 +239,7 @@ Page({
 
 						wx.showModal({
 							title: '配网成功',
-							content: `成功连接到WIFI [${options.data.ssid}]`, //注意这里不是字符串
+							content: `成功连接到WIFI ${options.data.ssid}`, //注意这里不是字符串
 							showCancel: false,
 							confirmText: '确定',
 							confirmColor: '#fbad32',
@@ -444,6 +446,7 @@ Page({
 	 * 生命周期函数--监听页面卸载
 	 */
 	onUnload() {
+		//TODO:这里要写部分卸载代码
 		xBlufi.listenDeviceMsgEvent(false, _this.funListenDeviceMegEvent);
 	}
 })
